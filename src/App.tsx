@@ -1,122 +1,87 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+// src/App.tsx
+import { useSimulator } from './hooks/useSimulator';
+import { PacketCanvas } from './components/canvas/PacketCanvas';
+import { Play, Pause, RotateCcw, StepForward, Plug, Unplug } from 'lucide-react';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const {
+    snapshot,
+    isRunning,
+    start,
+    pause,
+    step,
+    reset,
+    appOpenClient,
+    appCloseClient,
+    dropPacket,
+  } = useSimulator(50); // 50ms tick rate
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <header className="flex justify-between items-center border-b border-slate-800 pb-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Packet Lab</h1>
+            <p className="text-sm text-slate-400">Interactive TCP State Machine & Protocol Visualizer</p>
+          </div>
+          
+          {/* Playback & Action Controls */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={appOpenClient}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition"
+            >
+              <Plug size={16} /> Active Open (SYN)
+            </button>
+            <button
+              onClick={appCloseClient}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 rounded-lg text-sm font-semibold transition"
+            >
+              <Unplug size={16} /> Active Close (FIN)
+            </button>
+            <div className="h-6 w-px bg-slate-800 mx-1" />
+            <button
+              onClick={isRunning ? pause : start}
+              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"
+            >
+              {isRunning ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+            <button
+              onClick={step}
+              disabled={isRunning}
+              className="p-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 rounded-lg transition"
+            >
+              <StepForward size={18} />
+            </button>
+            <button
+              onClick={reset}
+              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"
+            >
+              <RotateCcw size={18} />
+            </button>
+          </div>
+        </header>
 
-      <div className="ticks"></div>
+        {/* SVG Visualizer Canvas */}
+        <PacketCanvas
+          client={snapshot.client}
+          server={snapshot.server}
+          packets={snapshot.packets}
+          onDropPacket={dropPacket}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        {/* Event Logs Panel */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 h-48 overflow-y-auto font-mono text-xs text-slate-300">
+          <div className="font-semibold text-slate-500 uppercase tracking-wider mb-2">Protocol Event Logs</div>
+          {snapshot.logs.length === 0 ? (
+            <div className="text-slate-600 italic">No events recorded. Click "Active Open" to start a handshake.</div>
+          ) : (
+            snapshot.logs.map((log, idx) => (
+              <div key={idx} className="py-0.5 border-b border-slate-800/50">{log}</div>
+            ))
+          )}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </div>
+    </div>
+  );
 }
-
-export default App
