@@ -25,6 +25,17 @@ export class Simulator {
       nextSeqNum: 1000,
       expectedSeqNum: 0,
       expectedAckNum: 0,
+      sendUna: 0,
+      sendNext: 0,
+      sendWnd: 0,
+      rcvNext: 0,
+      rcvWnd: 0,
+      rtoTicks: 0,
+      maxRtoTicks: 0,
+      duplicateAckCount: 0,
+      sendBuffer: [],
+      recvBuffer: [],
+      outOfOrderBuffer: [],
     };
     this.server = {
       id: 'server',
@@ -32,6 +43,17 @@ export class Simulator {
       nextSeqNum: 5000,
       expectedSeqNum: 0,
       expectedAckNum: 0,
+      sendUna: 0,
+      sendNext: 0,
+      sendWnd: 0,
+      rcvNext: 0,
+      rcvWnd: 0,
+      rtoTicks: 0,
+      maxRtoTicks: 0,
+      duplicateAckCount: 0,
+      sendBuffer: [],
+      recvBuffer: [],
+      outOfOrderBuffer: [],
     };
   }
 
