@@ -1,57 +1,58 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Simulator, type SimulatorSnapshot } from '../engine/Simulator';
 
 export function useSimulator(tickIntervalMs: number = 50) {
-  const simulatorRef = useRef<Simulator>(new Simulator());
+  const [simulator, setSimulator] = useState<Simulator>(() => new Simulator());
   const [snapshot, setSnapshot] = useState<SimulatorSnapshot>(() =>
-    simulatorRef.current.getSnapshot()
+    simulator.getSnapshot()
   );
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
   const updateSnapshot = useCallback(() => {
-    setSnapshot(simulatorRef.current.getSnapshot());
-  }, []);
+    setSnapshot(simulator.getSnapshot());
+  }, [simulator]);
 
   // Tick loop driven by interval
   useEffect(() => {
     if (!isRunning) return;
 
     const intervalId = setInterval(() => {
-      simulatorRef.current.tick();
+      simulator.tick();
       updateSnapshot();
     }, tickIntervalMs);
 
     return () => clearInterval(intervalId);
-  }, [isRunning, tickIntervalMs, updateSnapshot]);
+  }, [isRunning, tickIntervalMs, updateSnapshot, simulator]);
 
   // Actions
   const start = useCallback(() => setIsRunning(true), []);
   const pause = useCallback(() => setIsRunning(false), []);
   const step = useCallback(() => {
-    simulatorRef.current.tick();
+    simulator.tick();
     updateSnapshot();
-  }, [updateSnapshot]);
+  }, [simulator, updateSnapshot]);
 
   const reset = useCallback(() => {
     setIsRunning(false);
-    simulatorRef.current = new Simulator();
-    updateSnapshot();
-  }, [updateSnapshot]);
+    const nextSimulator = new Simulator();
+    setSimulator(nextSimulator);
+    setSnapshot(nextSimulator.getSnapshot());
+  }, []);
 
   const appOpenClient = useCallback(() => {
-    simulatorRef.current.appOpenClient();
+    simulator.appOpenClient();
     updateSnapshot();
-  }, [updateSnapshot]);
+  }, [simulator, updateSnapshot]);
 
   const appCloseClient = useCallback(() => {
-    simulatorRef.current.appCloseClient();
+    simulator.appCloseClient();
     updateSnapshot();
-  }, [updateSnapshot]);
+  }, [simulator, updateSnapshot]);
 
   const dropPacket = useCallback((id: string) => {
-    simulatorRef.current.dropPacket(id);
+    simulator.dropPacket(id);
     updateSnapshot();
-  }, [updateSnapshot]);
+  }, [simulator, updateSnapshot]);
 
   return {
     snapshot,

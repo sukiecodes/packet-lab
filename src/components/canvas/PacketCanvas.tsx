@@ -24,10 +24,12 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
   const linkY = 110;
 
   return (
-    <div className="w-full bg-slate-900 rounded-xl p-6 shadow-inner border border-slate-800">
+    <div className="canvas-frame">
       <svg
         viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-        className="w-full h-auto overflow-visible select-none"
+        className="select-none"
+        role="img"
+        aria-label="TCP client and server network visualization"
       >
         {/* Background Network Channel Wire */}
         <line
@@ -35,14 +37,23 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
           y1={linkY}
           x2={serverX}
           y2={linkY}
-          stroke="#334155"
-          strokeWidth="6"
+          stroke="#343846"
+          strokeWidth="3"
           strokeDasharray="8 8"
+        />
+        <line
+          x1={clientX}
+          y1={linkY}
+          x2={serverX}
+          y2={linkY}
+          stroke="#171a22"
+          strokeWidth="1"
         />
 
         {/* Client Node */}
         <g transform={`translate(${clientX}, ${linkY})`}>
-          <circle r="42" fill="#1e293b" stroke="#3b82f6" strokeWidth="4" />
+          <circle r="42" fill="#171a24" stroke="#5869de" strokeWidth="3" />
+          <circle r="32" fill="none" stroke="#5869de" strokeWidth="1" opacity="0.16" />
           <text
             y="-5"
             textAnchor="middle"
@@ -58,7 +69,7 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
             width="90"
             height="20"
             rx="10"
-            fill="#1d4ed8"
+            fill="#4f5fc9"
           />
           <text
             y="26"
@@ -73,7 +84,8 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
 
         {/* Server Node */}
         <g transform={`translate(${serverX}, ${linkY})`}>
-          <circle r="42" fill="#1e293b" stroke="#10b981" strokeWidth="4" />
+          <circle r="42" fill="#171a24" stroke="#4d9c83" strokeWidth="3" />
+          <circle r="32" fill="none" stroke="#4d9c83" strokeWidth="1" opacity="0.16" />
           <text
             y="-5"
             textAnchor="middle"
@@ -89,7 +101,7 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
             width="90"
             height="20"
             rx="10"
-            fill="#047857"
+            fill="#397963"
           />
           <text
             y="26"
@@ -125,17 +137,16 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
                 width="72"
                 height="40"
                 rx="8"
-                fill={packet.status === 'dropped' ? '#ef4444' : '#38bdf8'}
-                stroke="#ffffff"
-                strokeWidth="2"
-                className="shadow-lg"
+                fill={packet.status === 'dropped' ? '#d95a69' : '#7786ef'}
+                stroke={packet.status === 'dropped' ? '#ef9aa5' : '#bac2ff'}
+                strokeWidth="1.5"
               />
 
               {/* TCP Flag Badge */}
               <text
                 y="-2"
                 textAnchor="middle"
-                fill="#0f172a"
+                fill="#11131a"
                 fontWeight="800"
                 fontSize="12"
               >
@@ -146,7 +157,7 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
               <text
                 y="12"
                 textAnchor="middle"
-                fill="#1e293b"
+                fill="#1f2230"
                 fontWeight="500"
                 fontSize="9"
               >
@@ -157,10 +168,19 @@ export const PacketCanvas: React.FC<PacketCanvasProps> = ({
               {packet.status === 'in-transit' && (
                 <g
                   transform="translate(28, -16)"
-                  className="cursor-pointer hover:scale-125 transition-transform"
+                  className="packet-drop-target"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Drop ${packet.type.join('/')} packet`}
                   onClick={() => onDropPacket(packet.id)}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onDropPacket(packet.id);
+                    }
+                  }}
                 >
-                  <circle r="10" fill="#dc2626" />
+                  <circle r="12" fill="#d95a69" stroke="#f5bac2" strokeWidth="1.5" />
                   <XCircle size={14} color="#ffffff" x="-7" y="-7" />
                 </g>
               )}
